@@ -14,12 +14,12 @@ export class GoogleMapsService {
   private readonly libraries: string[] = ['maps', 'marker'];
 
   loadGoogleMaps(): Promise<void> {
-    if (this.loadingPromise) {
-      return this.loadingPromise;
-    }
-
     if (this.isLoaded()) {
       return Promise.resolve();
+    }
+
+    if (this.loadingPromise) {
+      return this.loadingPromise;
     }
 
     this.loadingPromise = new Promise<void>((resolve, reject) => {

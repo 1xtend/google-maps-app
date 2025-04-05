@@ -18,6 +18,6 @@ export class AppComponent {
   constructor() {
     afterNextRender(async () => {
       await this.googleMapsService.loadGoogleMaps();
-    })
+    });
   }
 }
