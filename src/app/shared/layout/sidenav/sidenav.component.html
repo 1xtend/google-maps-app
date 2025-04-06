@@ -1,8 +1,25 @@
 <form class="form" [formGroup]="filtersForm">
   <mat-form-field>
     <mat-label>Search</mat-label>
-    <input type="text" matInput formControlName="search">
+    <input type="text" matInput formControlName="search"/>
     <mat-hint>Markers quantity: {{ placesQuantity() }}</mat-hint>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>County</mat-label>
+    <input
+      type="text"
+      matInput
+      formControlName="county"
+      [matAutocomplete]="autocomplete"
+      (input)="onFilterCounties($event)"
+      (focus)="onFilterCounties($event)"
+    />
+    <mat-autocomplete #autocomplete="matAutocomplete" requireSelection autoActiveFirstOption>
+      @for (county of filteredCounties(); track county) {
+        <mat-option [value]="county">{{ county }}</mat-option>
+      }
+    </mat-autocomplete>
   </mat-form-field>
 
   <button type="button" mat-flat-button (click)="onResetFilters()">Reset filters</button>

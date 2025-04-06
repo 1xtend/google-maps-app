@@ -1,0 +1,22 @@
+export const counties: string[] = [
+  'Dublin',
+  'Kilkenny',
+  'Galway',
+  'Mayo',
+  'Wexford',
+  'Longford',
+  'Limerick',
+  'Laois',
+  'Cork',
+  'Waterford',
+  'Kerry',
+  'Carlow',
+  'Clare',
+  'Leitrim',
+  'Wicklow',
+  'Cavan',
+  'Donegal',
+  'Tipperary',
+  'Louth',
+  'Sligo'
+]

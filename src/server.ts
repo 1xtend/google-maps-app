@@ -20,7 +20,14 @@ const angularApp = new AngularNodeAppEngine();
 const apiUrl: string = environment.placesApiUrl;
 
 app.get('/api/places', async (req: Request, res: Response) => {
-  const { search } = req.query;
+  const { search, county } = req.query;
+
+  const normalizedSearch: string | undefined = search && typeof search === 'string'
+    ? search.trim().toLowerCase()
+    : undefined;
+  const normalizedCounty: string | undefined = county && typeof county === 'string'
+    ? county.trim().toLowerCase()
+    : undefined;
 
   try {
     const response = await fetch(apiUrl);
@@ -32,11 +39,15 @@ app.get('/api/places', async (req: Request, res: Response) => {
       return;
     }
 
-    if (search && typeof search === 'string') {
+    if (normalizedSearch) {
       places = places.filter((place) =>
-        place.name.toLowerCase().includes(search.trim()) ||
-        place.description.toLowerCase().includes(search.trim())
+        place.name.toLowerCase().includes(normalizedSearch) ||
+        place.description.toLowerCase().includes(normalizedSearch)
       );
+    }
+
+    if (normalizedCounty) {
+      places = places.filter((place) => place.address[0].addressRegion.trim().toLowerCase().includes(normalizedCounty));
     }
 
     res.status(200).json(places);
