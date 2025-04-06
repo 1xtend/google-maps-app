@@ -2,6 +2,10 @@
   display: block;
   padding: 1rem;
 
+  .markers-quantity {
+    margin: 0 0 1rem;
+  }
+
   ::ng-deep {
     .mat-mdc-form-field {
       width: 100%;

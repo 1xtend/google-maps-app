@@ -8,7 +8,7 @@ import {
   viewChild
 } from '@angular/core';
 import { MatInput } from '@angular/material/input';
-import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
@@ -27,7 +27,6 @@ import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/mat
     MatInput,
     ReactiveFormsModule,
     MatButton,
-    MatHint,
     MatAutocompleteTrigger,
     MatAutocomplete,
     MatOption
