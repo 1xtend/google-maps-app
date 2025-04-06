@@ -19,15 +19,16 @@ const app = express();
 const angularApp = new AngularNodeAppEngine();
 const apiUrl: string = environment.placesApiUrl;
 
-app.get('/api/places', async (req: Request, res: Response) => {
-  const { search, county } = req.query;
+function normalizeString(value: string): string {
+  return value.trim().toLowerCase();
+}
 
-  const normalizedSearch: string | undefined = search && typeof search === 'string'
-    ? search.trim().toLowerCase()
-    : undefined;
-  const normalizedCounty: string | undefined = county && typeof county === 'string'
-    ? county.trim().toLowerCase()
-    : undefined;
+app.get('/api/places', async (req: Request, res: Response) => {
+  const { search, county, streetAddress } = req.query;
+
+  const normalizedSearch: string | undefined = search && typeof search === 'string' ? normalizeString(search) : undefined;
+  const normalizedCounty: string | undefined = county && typeof county === 'string' ? normalizeString(county) : undefined;
+  const normalizedStreetAddress: string | undefined = streetAddress && typeof streetAddress === 'string' ? normalizeString(streetAddress) : undefined;
 
   try {
     const response = await fetch(apiUrl);
@@ -47,7 +48,13 @@ app.get('/api/places', async (req: Request, res: Response) => {
     }
 
     if (normalizedCounty) {
-      places = places.filter((place) => place.address[0].addressRegion.trim().toLowerCase().includes(normalizedCounty));
+      places = places.filter((place) =>
+        place.address[0].addressRegion?.trim().toLowerCase().includes(normalizedCounty));
+    }
+
+    if (normalizedStreetAddress) {
+      places = places.filter((place) =>
+        place.address[0].streetAddress?.trim().toLowerCase().includes(normalizedStreetAddress))
     }
 
     res.status(200).json(places);

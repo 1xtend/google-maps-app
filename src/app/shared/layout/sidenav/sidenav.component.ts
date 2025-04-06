@@ -45,7 +45,8 @@ export class SidenavComponent {
 
   readonly filtersForm = this.fb.group<FiltersForm>({
     search: this.fb.control<string>(''),
-    county: this.fb.control<string>('')
+    county: this.fb.control<string>(''),
+    streetAddress: this.fb.control<string>('')
   });
 
   private readonly counties: string[] = counties;
