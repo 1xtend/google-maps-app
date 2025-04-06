@@ -1,0 +1,8 @@
+<form class="form" [formGroup]="filtersForm">
+  <mat-form-field>
+    <mat-label>Search</mat-label>
+    <input type="text" matInput formControlName="search">
+  </mat-form-field>
+
+  <button type="button" mat-flat-button (click)="onResetFilters()">Reset filters</button>
+</form>

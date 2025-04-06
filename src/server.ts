@@ -8,53 +8,35 @@ import express from 'express';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Request, Response } from 'express';
-import * as fs from 'node:fs';
-import { PlacesCollection } from './app/features/maps/models/places-collection.interface';
 import { Place } from './app/features/maps/models/place.interface';
+import { PlacesCollection } from './app/features/maps/models/places-collection.interface';
 
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+const apiUrl: string = 'https://failteireland.azure-api.net/opendata-api/v2/attractions';
 
-/**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/**', (req, res) => {
- *   // Handle API request
- * });
- * ```
- */
+app.get('/api/places', async (req: Request, res: Response) => {
+  const { search } = req.query;
 
-app.get('/api/places', (req: Request, res: Response) => {
-  const filePath = resolve(process.cwd(), 'src', 'assets', 'data', 'places.json');
+  try {
+    const response = await fetch(apiUrl);
+    const collection: PlacesCollection = await response.json();
+    let places: Place[] = collection.value;
 
-  fs.readFile(filePath, 'utf8', (error, data) => {
-    if (error) {
-      res.status(500).json({ error: 'Failed to load data' });
-      return;
+    if (search && typeof search === 'string') {
+      places = places.filter((place) =>
+        place.name.toLowerCase().includes(search) ||
+        place.description.toLowerCase().includes(search)
+      );
     }
 
-    try {
-      const collection: PlacesCollection = JSON.parse(data);
-      const places: Place[] = collection.features.map(({ properties, geometry }) => ({
-        id: properties._id,
-        name: properties.NAME,
-        coords: {
-          latitude: geometry.coordinates[0][1],
-          longitude: geometry.coordinates[0][0],
-        }
-      }));
-
-      res.json(places);
-    } catch (err) {
-      res.status(500).json({ error: 'Failed to load data' });
-    }
-  });
+    res.status(200).json(places);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load data' });
+  }
 })
 
 /**

@@ -7,7 +7,7 @@
     @if (places$ | async; as places) {
       @for (place of places; track place.id) {
         <map-advanced-marker
-          [position]="{ lat: place.coords.latitude, lng: place.coords.longitude }"
+          [position]="{ lat: place.geo.latitude, lng: place.geo.longitude }"
           [title]="place.name"
         ></map-advanced-marker>
       }

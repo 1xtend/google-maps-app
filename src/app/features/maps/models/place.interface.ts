@@ -1,8 +1,16 @@
+import { GeoCoordinates } from './geo-coordinates.interface';
+import { PostalAddress } from './postal-address.interface';
+import { AdditionalProperty } from './additional-property.inteface';
+
 export interface Place {
-  id: number;
+  "@context": string;
+  "@type": string[];
   name: string;
-  coords: {
-    latitude: number;
-    longitude: number;
-  }
+  description: string;
+  url: string;
+  telephone: string;
+  geo: GeoCoordinates;
+  address: PostalAddress[];
+  additionalProperty: AdditionalProperty[];
+  id: string;
 }

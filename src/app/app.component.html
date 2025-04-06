@@ -1,9 +1,14 @@
 <div class="wrapper">
-  <mat-toolbar>
-    <span>Google Maps App</span>
-  </mat-toolbar>
+  <app-navbar (menuButtonClick)="sidenav.toggle(!sidenav.opened)"></app-navbar>
 
-  <main class="main">
-    <app-google-map></app-google-map>
-  </main>
+  <mat-sidenav-container class="sidenav-container">
+    <mat-sidenav #sidenav position="end" class="sidenav">
+      @defer (when sidenav.opened) {
+        <app-sidenav></app-sidenav>
+      }
+    </mat-sidenav>
+    <mat-sidenav-content class="sidenav-content">
+      <app-google-map></app-google-map>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
 </div>
