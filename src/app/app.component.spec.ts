@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-import { GoogleMapsService } from './feature/maps/services/google-maps.service';
+import { GoogleMapsService } from './features/maps/services/google-maps.service';
 import { signal } from '@angular/core';
 
 describe('AppComponent', () => {

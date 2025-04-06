@@ -1,19 +1,19 @@
 import { afterNextRender, Component, inject } from '@angular/core';
-import { GoogleMapsModule } from '@angular/google-maps';
-import { GoogleMapsService } from './feature/maps/services/google-maps.service';
+import { GoogleMapsService } from './features/maps/services/google-maps.service';
+import { MatToolbar } from '@angular/material/toolbar';
+import { GoogleMapComponent } from './features/maps/components/google-map/google-map.component';
 
 @Component({
   selector: 'app-root',
   imports: [
-    GoogleMapsModule
+    MatToolbar,
+    GoogleMapComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
   private googleMapsService = inject(GoogleMapsService)
-
-  isGoogleMapsLoaded = this.googleMapsService.isGoogleMapsLoaded;
 
   constructor() {
     afterNextRender(async () => {
