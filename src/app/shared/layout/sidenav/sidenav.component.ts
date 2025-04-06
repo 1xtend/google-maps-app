@@ -50,6 +50,10 @@ export class SidenavComponent {
   private deepEqual(obj1: any, obj2: any): boolean {
     if (obj1 === obj2) return true;
 
+    if (typeof obj1 === 'string' && typeof obj2 === 'string') {
+      return obj1.trim() === obj2.trim();
+    }
+
     if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) {
       return false;
     }

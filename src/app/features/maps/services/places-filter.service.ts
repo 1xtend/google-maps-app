@@ -18,7 +18,7 @@ export class PlacesFilterService {
       .filter(([_, value]) => value)
       .map(([key, value]) => {
         if (typeof value === 'string') {
-          return [key, value.toLowerCase()]
+          return [key, value.trim().toLowerCase()]
         }
 
         return [key, value]

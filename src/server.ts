@@ -10,13 +10,14 @@ import { fileURLToPath } from 'node:url';
 import { Request, Response } from 'express';
 import { Place } from './app/features/maps/models/place.interface';
 import { PlacesCollection } from './app/features/maps/models/places-collection.interface';
+import { environment } from './environments/environment';
 
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
-const apiUrl: string = 'https://failteireland.azure-api.net/opendata-api/v2/attractions';
+const apiUrl: string = environment.placesApiUrl;
 
 app.get('/api/places', async (req: Request, res: Response) => {
   const { search } = req.query;
@@ -24,12 +25,17 @@ app.get('/api/places', async (req: Request, res: Response) => {
   try {
     const response = await fetch(apiUrl);
     const collection: PlacesCollection = await response.json();
-    let places: Place[] = collection.value;
+    let places: Place[] | undefined | null = collection.value;
+
+    if (!places || places.length === 0) {
+      res.status(200).json([]);
+      return;
+    }
 
     if (search && typeof search === 'string') {
       places = places.filter((place) =>
-        place.name.toLowerCase().includes(search) ||
-        place.description.toLowerCase().includes(search)
+        place.name.toLowerCase().includes(search.trim()) ||
+        place.description.toLowerCase().includes(search.trim())
       );
     }
 
