@@ -10,6 +10,19 @@ export class PlacesFilterService {
   filters$ = this.filtersSubject.asObservable();
 
   updateFilters(filters: Partial<PlacesFilters>): void {
-    this.filtersSubject.next(filters);
+    this.filtersSubject.next(this.normalizeFilters(filters));
+  }
+
+  private normalizeFilters<T extends Partial<PlacesFilters>>(filters: T): T {
+    const entries = Object.entries(filters)
+      .filter(([_, value]) => value)
+      .map(([key, value]) => {
+        if (typeof value === 'string') {
+          return [key, value.toLowerCase()]
+        }
+
+        return [key, value]
+      })
+    return Object.fromEntries(entries);
   }
 }

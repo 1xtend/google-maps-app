@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatInput } from '@angular/material/input';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged, map, } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { PlacesFilterService } from '../../../features/maps/services/places-filter.service';
 import { MatButton } from '@angular/material/button';
 import { FiltersForm } from '../../../features/maps/models/filters-form.interface';
+import { PlacesService } from '../../../features/maps/services/places.service';
 
 @Component({
   selector: 'app-sidenav',
@@ -15,7 +16,8 @@ import { FiltersForm } from '../../../features/maps/models/filters-form.interfac
     MatLabel,
     MatInput,
     ReactiveFormsModule,
-    MatButton
+    MatButton,
+    MatHint
   ],
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
@@ -24,17 +26,18 @@ import { FiltersForm } from '../../../features/maps/models/filters-form.interfac
 export class SidenavComponent {
   private fb = inject(FormBuilder).nonNullable;
   private placesFilterService = inject(PlacesFilterService);
+  private placesService = inject(PlacesService);
 
   readonly filtersForm = this.fb.group<FiltersForm>({
     search: this.fb.control<string>('')
   });
+  placesQuantity = this.placesService.placesQuantity;
 
   constructor() {
     this.filtersForm.valueChanges.pipe(
       takeUntilDestroyed(),
       debounceTime(300),
-      distinctUntilChanged(this.deepEqual.bind(this)),
-      map(this.removeEmptyFields)
+      distinctUntilChanged(this.deepEqual.bind(this))
     ).subscribe((value) => {
       this.placesFilterService.updateFilters(value);
     })
@@ -65,10 +68,5 @@ export class SidenavComponent {
     }
 
     return true;
-  }
-
-  private removeEmptyFields(filters: Record<keyof FiltersForm, any>) {
-    const entries = Object.entries(filters).filter(([_, value]) => value);
-    return Object.fromEntries(entries);
   }
 }
