@@ -7,6 +7,10 @@ import {
 import express from 'express';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { Request, Response } from 'express';
+import * as fs from 'node:fs';
+import { PlacesCollection } from './app/features/maps/models/places-collection.interface';
+import { Place } from './app/features/maps/models/place.interface';
 
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
@@ -25,6 +29,33 @@ const angularApp = new AngularNodeAppEngine();
  * });
  * ```
  */
+
+app.get('/api/places', (req: Request, res: Response) => {
+  const filePath = resolve(process.cwd(), 'src', 'assets', 'data', 'places.json');
+
+  fs.readFile(filePath, 'utf8', (error, data) => {
+    if (error) {
+      res.status(500).json({ error: 'Failed to load data' });
+      return;
+    }
+
+    try {
+      const collection: PlacesCollection = JSON.parse(data);
+      const places: Place[] = collection.features.map(({ properties, geometry }) => ({
+        id: properties._id,
+        name: properties.NAME,
+        coords: {
+          latitude: geometry.coordinates[0][1],
+          longitude: geometry.coordinates[0][0],
+        }
+      }));
+
+      res.json(places);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to load data' });
+    }
+  });
+})
 
 /**
  * Serve static files from /browser
@@ -56,7 +87,7 @@ app.use('/**', (req, res, next) => {
 if (isMainModule(import.meta.url)) {
   const port = process.env['PORT'] || 4000;
   app.listen(port, () => {
-    console.log(`Node Express server listening on http://localhost:${port}`);
+    console.log(`Node Express server listening on http://localhost:${ port }`);
   });
 }
 
