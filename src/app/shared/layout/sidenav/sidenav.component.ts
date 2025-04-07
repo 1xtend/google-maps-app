@@ -2,8 +2,8 @@ import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
-  inject,
+  DestroyRef, effect,
+  inject, PLATFORM_ID,
   signal,
   viewChild
 } from '@angular/core';
@@ -18,6 +18,10 @@ import { FiltersForm } from '../../../features/maps/models/filters-form.interfac
 import { PlacesService } from '../../../features/maps/services/places.service';
 import { counties } from '../../helpers/counties';
 import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/material/autocomplete';
+import { tags } from '../../helpers/tags';
+import { MatSelect } from '@angular/material/select';
+import { EqualityService } from '../../../core/services/equality.service';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-sidenav',
@@ -29,7 +33,8 @@ import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/mat
     MatButton,
     MatAutocompleteTrigger,
     MatAutocomplete,
-    MatOption
+    MatOption,
+    MatSelect
   ],
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
@@ -40,21 +45,38 @@ export class SidenavComponent {
   private placesFilterService = inject(PlacesFilterService);
   private placesService = inject(PlacesService);
   private destroyRef = inject(DestroyRef);
+  private equalityService = inject(EqualityService);
+  private platformId = inject(PLATFORM_ID);
 
-  private autocomplete = viewChild<MatAutocomplete>('autocomplete');
+  private countyAutocomplete = viewChild<MatAutocomplete>('countyAutocomplete');
 
   readonly filtersForm = this.fb.group<FiltersForm>({
     search: this.fb.control<string>(''),
     county: this.fb.control<string>(''),
-    streetAddress: this.fb.control<string>('')
+    streetAddress: this.fb.control<string>(''),
+    tags: this.fb.control<string[]>([])
   });
 
-  private readonly counties: string[] = counties;
+  private readonly countiesList: string[] = counties;
+  readonly tagsList: string[] = tags;
 
   placesQuantity = this.placesService.placesQuantity;
-  filteredCounties = signal<string[]>(this.counties);
+  filteredCounties = signal<string[]>(this.countiesList);
+  placesLoading = this.placesService.loading;
 
   constructor() {
+    if (isPlatformBrowser(this.platformId)) {
+      effect(() => {
+        const placesLoading: boolean | undefined = this.placesLoading();
+
+        if (placesLoading) {
+          this.filtersForm.disable();
+        } else {
+          this.filtersForm.enable();
+        }
+      });
+    }
+
     afterNextRender(() => {
       this.filterChanges();
     })
@@ -62,19 +84,19 @@ export class SidenavComponent {
 
   onResetFilters(): void {
     this.filtersForm.reset();
-    this.autocomplete()?.options.last.deselect();
+    this.countyAutocomplete()?.options.last.deselect();
   }
 
   onFilterCounties(e: Event): void {
     const value = (e.target as HTMLInputElement).value;
 
     if (!value) {
-      this.filteredCounties.set(this.counties);
+      this.filteredCounties.set(this.countiesList);
       return;
     }
 
     const filterValue: string = value.trim().toLowerCase();
-    this.filteredCounties.set(this.counties.filter((county) => county.toLowerCase().includes(filterValue)))
+    this.filteredCounties.set(this.countiesList.filter((county) => county.toLowerCase().includes(filterValue)))
   }
 
   private filterChanges(): void {
@@ -88,37 +110,6 @@ export class SidenavComponent {
   }
 
   private deepEqual(a: any, b: any): boolean {
-    if (a === b) {
-      return true;
-    }
-
-    if (typeof a === 'string' && typeof b === 'string') {
-      return a.trim() === b.trim();
-    }
-
-    // null, undefined and '' are equal
-    if ((a === null || a === undefined || a === '') && (b === null || b === undefined || b === '')) {
-      return true;
-    }
-
-    // If one of arguments is null or undefined, they're not equal
-    if (a === null || b === null || a === undefined || b === undefined) {
-      return false;
-    }
-
-    if (typeof a === 'object' && typeof b === 'object') {
-      for (const key of Object.keys(a)) {
-        const valueA = a[key];
-        const valueB = b[key];
-
-        if (!this.deepEqual(valueA, valueB)) {
-          return false;
-        }
-      }
-
-      return true;
-    }
-
-    return true;
+    return this.equalityService.deepEqual(a, b);
   }
 }

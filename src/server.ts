@@ -24,11 +24,12 @@ function normalizeString(value: string): string {
 }
 
 app.get('/api/places', async (req: Request, res: Response) => {
-  const { search, county, streetAddress } = req.query;
+  const { search, county, streetAddress, tags } = req.query;
 
   const normalizedSearch: string | undefined = search && typeof search === 'string' ? normalizeString(search) : undefined;
   const normalizedCounty: string | undefined = county && typeof county === 'string' ? normalizeString(county) : undefined;
   const normalizedStreetAddress: string | undefined = streetAddress && typeof streetAddress === 'string' ? normalizeString(streetAddress) : undefined;
+  const normalizedTags: string[] | undefined = tags && typeof tags === 'string' ? tags.split(',') : undefined;
 
   try {
     const response = await fetch(apiUrl);
@@ -55,6 +56,27 @@ app.get('/api/places', async (req: Request, res: Response) => {
     if (normalizedStreetAddress) {
       places = places.filter((place) =>
         place.address[0].streetAddress?.trim().toLowerCase().includes(normalizedStreetAddress))
+    }
+
+    if (normalizedTags && normalizedTags.length > 0) {
+      places = places.filter((place) => {
+        let tagSource: string | string[] | undefined = place.additionalProperty?.[0]?.value;
+
+        if (!tagSource) {
+          return false;
+        }
+
+        if (typeof tagSource === 'string') {
+          tagSource = [tagSource];
+        }
+
+        if (Array.isArray(tagSource) && tagSource.length > 0) {
+          const normalizedTagSource: string[] = tagSource.map((tag) => tag.trim().toLowerCase());
+          return normalizedTags.every((tag) => normalizedTagSource.includes(tag.toLowerCase()));
+        }
+
+        return false;
+      })
     }
 
     res.status(200).json(places);

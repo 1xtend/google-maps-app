@@ -12,11 +12,11 @@
       type="text"
       matInput
       formControlName="county"
-      [matAutocomplete]="autocomplete"
+      [matAutocomplete]="countyAutocomplete"
       (input)="onFilterCounties($event)"
       (focus)="onFilterCounties($event)"
     />
-    <mat-autocomplete #autocomplete="matAutocomplete" requireSelection autoActiveFirstOption>
+    <mat-autocomplete #countyAutocomplete="matAutocomplete" requireSelection autoActiveFirstOption>
       @for (county of filteredCounties(); track county) {
         <mat-option [value]="county">{{ county }}</mat-option>
       }
@@ -26,6 +26,15 @@
   <mat-form-field>
     <mat-label>Street Address</mat-label>
     <input type="text" matInput formControlName="streetAddress"/>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Tags</mat-label>
+    <mat-select formControlName="tags" multiple>
+      @for (tag of tagsList; track tag) {
+        <mat-option [value]="tag" [disabled]="placesLoading()">{{ tag }}</mat-option>
+      }
+    </mat-select>
   </mat-form-field>
 
   <button type="button" mat-flat-button (click)="onResetFilters()">Reset filters</button>

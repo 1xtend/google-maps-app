@@ -1,5 +1,5 @@
 import { inject, Injectable, makeStateKey, PLATFORM_ID, signal, TransferState } from '@angular/core';
-import { catchError, Observable, of, shareReplay, tap } from 'rxjs';
+import { catchError, finalize, Observable, of, shareReplay, tap } from 'rxjs';
 import { Place } from '../models/place.interface';
 import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
@@ -19,6 +19,10 @@ export class PlacesService {
   private _placesQuantity = signal<number>(0);
   placesQuantity = this._placesQuantity.asReadonly();
 
+  private _loading = signal<boolean>(false);
+  loading = this._loading.asReadonly();
+
+
   getPlaces(filters?: Partial<PlacesFilters>): Observable<Place[]> {
     if (isPlatformBrowser(this.platformId)) {
       const storedPlaces: Place[] | null = this.transferState.get(this.PLACES_KEY, null);
@@ -33,6 +37,8 @@ export class PlacesService {
   }
 
   private fetchPlaces(filters?: Partial<PlacesFilters>): Observable<Place[]> {
+    this._loading.set(true);
+
     return this.http.get<Place[]>(this.apiUrl, { params: filters }).pipe(
       tap((places) => {
         if (isPlatformServer(this.platformId)) {
@@ -41,6 +47,7 @@ export class PlacesService {
 
         this._placesQuantity.set(places.length);
       }),
+      finalize(() => this._loading.set(false)),
       shareReplay(1),
       catchError(() => of([]))
     );

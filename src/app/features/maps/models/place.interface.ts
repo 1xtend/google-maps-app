@@ -11,6 +11,6 @@ export interface Place {
   telephone: string;
   geo: GeoCoordinates;
   address: PostalAddress[];
-  additionalProperty: AdditionalProperty[];
+  additionalProperty?: AdditionalProperty[];
   id: string;
 }
