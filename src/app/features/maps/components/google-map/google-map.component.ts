@@ -3,7 +3,7 @@ import { GoogleMapsModule } from '@angular/google-maps';
 import { GoogleMapsService } from '../../services/google-maps.service';
 import { PlacesService } from '../../services/places.service';
 import { AsyncPipe } from '@angular/common';
-import { Observable, switchMap } from 'rxjs';
+import { map, merge, Observable, switchMap, withLatestFrom } from 'rxjs';
 import { Place } from '../../models/place.interface';
 import { PlacesFilterService } from '../../services/places-filter.service';
 
@@ -29,7 +29,15 @@ export class GoogleMapComponent {
     mapId: 'GOOGLE_MAP'
   }
 
-  readonly places$: Observable<Place[]> = this.placesFilterService.filters$.pipe(
-    switchMap((filters) => this.placesService.getPlaces(filters))
-  );
+  readonly places$: Observable<Place[]> = this.getPlaces();
+
+  private getPlaces(): Observable<Place[]> {
+    return merge(
+      this.placesFilterService.filters$,
+      this.placesService.reload$.pipe(
+        withLatestFrom(this.placesFilterService.filters$),
+        map(([_, filters]) => filters)
+      )
+    ).pipe(switchMap((filters) => this.placesService.getPlaces(filters)))
+  }
 }

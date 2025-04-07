@@ -1,5 +1,5 @@
 import { inject, Injectable, makeStateKey, PLATFORM_ID, signal, TransferState } from '@angular/core';
-import { catchError, finalize, Observable, of, shareReplay, tap } from 'rxjs';
+import { catchError, finalize, Observable, of, shareReplay, Subject, tap } from 'rxjs';
 import { Place } from '../models/place.interface';
 import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
@@ -22,6 +22,8 @@ export class PlacesService {
   private _loading = signal<boolean>(false);
   loading = this._loading.asReadonly();
 
+  private reloadSubject = new Subject<void>();
+  reload$ = this.reloadSubject.asObservable();
 
   getPlaces(filters?: Partial<PlacesFilters>): Observable<Place[]> {
     if (isPlatformBrowser(this.platformId)) {
@@ -34,6 +36,14 @@ export class PlacesService {
     }
 
     return this.fetchPlaces(filters);
+  }
+
+  triggerReload(): void {
+    if (this._loading()) {
+      return;
+    }
+
+    this.reloadSubject.next();
   }
 
   private fetchPlaces(filters?: Partial<PlacesFilters>): Observable<Place[]> {

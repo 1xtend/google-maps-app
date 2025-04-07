@@ -2,8 +2,8 @@ import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
-  DestroyRef, effect,
-  inject, PLATFORM_ID,
+  DestroyRef,
+  inject,
   signal,
   viewChild
 } from '@angular/core';
@@ -13,7 +13,7 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { PlacesFilterService } from '../../../features/maps/services/places-filter.service';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { FiltersForm } from '../../../features/maps/models/filters-form.interface';
 import { PlacesService } from '../../../features/maps/services/places.service';
 import { counties } from '../../helpers/counties';
@@ -21,7 +21,8 @@ import { MatAutocomplete, MatAutocompleteTrigger, MatOption } from '@angular/mat
 import { tags } from '../../helpers/tags';
 import { MatSelect } from '@angular/material/select';
 import { EqualityService } from '../../../core/services/equality.service';
-import { isPlatformBrowser } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-sidenav',
@@ -34,7 +35,10 @@ import { isPlatformBrowser } from '@angular/common';
     MatAutocompleteTrigger,
     MatAutocomplete,
     MatOption,
-    MatSelect
+    MatSelect,
+    MatIconButton,
+    MatIcon,
+    MatTooltip
   ],
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
@@ -46,7 +50,6 @@ export class SidenavComponent {
   private placesService = inject(PlacesService);
   private destroyRef = inject(DestroyRef);
   private equalityService = inject(EqualityService);
-  private platformId = inject(PLATFORM_ID);
 
   private countyAutocomplete = viewChild<MatAutocomplete>('countyAutocomplete');
 
@@ -65,18 +68,6 @@ export class SidenavComponent {
   placesLoading = this.placesService.loading;
 
   constructor() {
-    if (isPlatformBrowser(this.platformId)) {
-      effect(() => {
-        const placesLoading: boolean | undefined = this.placesLoading();
-
-        if (placesLoading) {
-          this.filtersForm.disable();
-        } else {
-          this.filtersForm.enable();
-        }
-      });
-    }
-
     afterNextRender(() => {
       this.filterChanges();
     })
@@ -97,6 +88,10 @@ export class SidenavComponent {
 
     const filterValue: string = value.trim().toLowerCase();
     this.filteredCounties.set(this.countiesList.filter((county) => county.toLowerCase().includes(filterValue)))
+  }
+
+  onReload(): void {
+    this.placesService.triggerReload();
   }
 
   private filterChanges(): void {

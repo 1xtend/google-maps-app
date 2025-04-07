@@ -37,5 +37,17 @@
     </mat-select>
   </mat-form-field>
 
-  <button type="button" mat-flat-button (click)="onResetFilters()">Reset filters</button>
+  <div class="sidenav-actions">
+    <button type="button" mat-flat-button (click)="onResetFilters()">Reset filters</button>
+    <button
+      type="button"
+      mat-icon-button
+      matTooltip="Refresh markers"
+      matTooltipPosition="left"
+      [disabled]="placesLoading()"
+      (click)="onReload()"
+    >
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
 </form>
