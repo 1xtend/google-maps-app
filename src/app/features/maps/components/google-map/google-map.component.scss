@@ -1,0 +1,6 @@
+:host {
+  ::ng-deep .active-marker {
+    outline: 2px solid blue;
+    border-radius: 8px;
+  }
+}
