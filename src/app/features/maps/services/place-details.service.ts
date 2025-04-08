@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Place } from '../../features/maps/models/place.interface';
-import { PlaceDetails } from '../../features/maps/models/place-details.inteface';
+import { Place } from '../models/place.interface';
+import { PlaceDetails } from '../models/place-details.inteface';
 
 @Injectable({
   providedIn: 'root'

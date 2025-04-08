@@ -5,6 +5,7 @@ import { filter, first, fromEvent, Subscription } from 'rxjs';
 import { DOCUMENT } from '@angular/common';
 import { TooltipPlacement } from '../models/tooltip-placement.enum';
 import { GoogleMap } from '@angular/google-maps';
+import { SelectedMarkersService } from './selected-markers.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,9 +14,9 @@ export class PlaceTooltipService {
   private viewContainerRef = inject(ViewContainerRef);
   private renderer = inject(Renderer2);
   private document = inject(DOCUMENT);
+  private selectedMarkersService = inject(SelectedMarkersService);
 
   private tooltipRef: ComponentRef<PlaceTooltipComponent> | null = null;
-  private markerEl: HTMLElement | null = null;
 
   private documentMousedownSubscription: Subscription | null = null;
   private zoomChangeSubscription: Subscription | null = null;
@@ -32,7 +33,8 @@ export class PlaceTooltipService {
     const tooltipEl: HTMLElement = tooltip.location.nativeElement;
 
     tooltip.setInput('place', place);
-    this.renderer.addClass(markerEl, 'active-marker');
+    this.selectedMarkersService.selectMarker(markerEl, place);
+    this.setTooltipStyles(tooltipEl, 0, 0, 'hidden');
 
     setTimeout(() => {
       this.positionTooltip(tooltipEl, this.document.body, e);
@@ -43,7 +45,6 @@ export class PlaceTooltipService {
     this.hideTooltipOnWindowResize();
 
     this.tooltipRef = tooltip;
-    this.markerEl = markerEl;
   }
 
   hide(): void {
@@ -54,8 +55,7 @@ export class PlaceTooltipService {
     this.tooltipRef.destroy();
     this.tooltipRef = null;
 
-    this.renderer.removeClass(this.markerEl, 'active-marker');
-    this.markerEl = null;
+    this.selectedMarkersService.unselectMarker();
 
     this.cleanSubscriptions();
   }
@@ -98,8 +98,7 @@ export class PlaceTooltipService {
     const position: { top: number, left: number } = this.calculatePosition(targetPos, tooltipRect, placement);
     const adjustedPosition: { top: number, left: number } = this.adjustPosition(position, tooltipRect, containerRect);
 
-    this.renderer.setStyle(tooltipEl, 'top', `${ adjustedPosition.top }px`);
-    this.renderer.setStyle(tooltipEl, 'left', `${ adjustedPosition.left }px`);
+    this.setTooltipStyles(tooltipEl, adjustedPosition.top, adjustedPosition.left, 'visible');
   }
 
   private getBestPlacement(targetPos: {
@@ -178,5 +177,11 @@ export class PlaceTooltipService {
         )
       )
     }
+  }
+
+  private setTooltipStyles(tooltipEl: HTMLElement, top: number, left: number, visibility: 'hidden' | 'visible'): void {
+    this.renderer.setStyle(tooltipEl, 'top', top > 0 ? `${ top }px` : top);
+    this.renderer.setStyle(tooltipEl, 'left', left > 0 ? `${ left }px` : left);
+    this.renderer.setStyle(tooltipEl, 'visibility', visibility);
   }
 }

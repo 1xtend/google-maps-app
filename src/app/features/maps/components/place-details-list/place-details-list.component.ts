@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Place } from '../../models/place.interface';
 import { PlaceDetails } from '../../models/place-details.inteface';
-import { PlaceDetailsService } from '../../../../features.maps/services/place-details.service';
+import { PlaceDetailsService } from '../../services/place-details.service';
 
 @Component({
   selector: 'app-place-details-list',

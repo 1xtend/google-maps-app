@@ -17,7 +17,11 @@ body {
 .sidenav-container.mat-drawer-container {
   background-color: #ffffff;
   flex: 1 0 auto;
-  padding: 1rem;
+}
+
+.sidenav-content.mat-drawer-content {
+  display: flex;
+  flex-direction: column;
 }
 
 .sidenav {
