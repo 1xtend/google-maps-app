@@ -1,0 +1,8 @@
+:host ::ng-deep {
+  .accordion .mat-expansion-panel-body {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+}

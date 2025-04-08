@@ -1,10 +1,6 @@
 import { inject, Injectable, Renderer2, signal } from '@angular/core';
 import { Place } from '../models/place.interface';
-
-interface Marker {
-  el: HTMLElement;
-  place: Place
-}
+import { Marker } from "../models/marker.interface";
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +8,11 @@ interface Marker {
 export class SelectedMarkersService {
   private renderer = inject(Renderer2);
 
-  private selectedMarker = signal<Marker | null>(null);
+  private _selectedMarker = signal<Marker | null>(null);
+  selectedMarker = this._selectedMarker.asReadonly();
+
+  private _selectedMarkers = signal<Marker[]>([]);
+  selectedMarkers = this._selectedMarkers.asReadonly();
 
   selectMarker(markerEl: HTMLElement, place: Place): void {
     this.addClass(markerEl);
@@ -23,12 +23,39 @@ export class SelectedMarkersService {
     this.updateMarkerSelection(null);
   }
 
-  getSelectedMarker(): Marker | null {
-    return this.selectedMarker();
+  selectMultiplyMarkers(markerEl: HTMLElement, place: Place): void {
+    this.addClass(markerEl);
+
+    this._selectedMarkers.update((prev) => {
+      const marker: Marker = { el: markerEl, place };
+
+      if (prev.length > 1) {
+        prev.forEach((prevMarker) => this.removeClass(prevMarker.el));
+        return [marker];
+      }
+
+      return [...prev, marker];
+    })
+  }
+
+  unselectAllMultiplyMarkers(): void {
+    this._selectedMarkers.update((prev) => {
+      if (prev.length > 0) {
+        prev.forEach((marker) => {
+          this.removeClass(marker.el);
+        })
+      }
+
+      return []
+    })
+  }
+
+  hasMarker(el: HTMLElement): boolean {
+    return this._selectedMarkers().some((marker) => el === marker.el);
   }
 
   private updateMarkerSelection(marker: Marker | null): void {
-    this.selectedMarker.update((prev) => {
+    this._selectedMarker.update((prev) => {
       if (prev) {
         this.removeClass(prev.el);
       }

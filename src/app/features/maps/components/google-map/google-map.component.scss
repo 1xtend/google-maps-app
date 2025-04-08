@@ -8,12 +8,14 @@
     flex: 1 0 auto;
   }
 
-  .accordion:not(:last-child) {
+  .map-controls:not(:last-child) {
     margin-bottom: 1rem;
   }
 
-  ::ng-deep .active-marker {
-    outline: 2px solid blue;
-    border-radius: 8px;
+  ::ng-deep {
+    .active-marker {
+      outline: 2px solid blue;
+      border-radius: 8px;
+    }
   }
 }
