@@ -1,0 +1,19 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  flex: 1 0 auto;
+
+  .map {
+    flex: 1 0 auto;
+  }
+
+  .accordion:not(:last-child) {
+    margin-bottom: 1rem;
+  }
+
+  ::ng-deep .active-marker {
+    outline: 2px solid blue;
+    border-radius: 8px;
+  }
+}

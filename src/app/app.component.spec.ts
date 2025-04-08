@@ -1,11 +1,20 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { GoogleMapsService } from './features/maps/services/google-maps.service';
+import { signal } from '@angular/core';
 
 describe('AppComponent', () => {
+  let fixture: ComponentFixture<AppComponent>;
+  const googleMapsServiceSpy = jasmine.createSpyObj('GoogleMapsService', ['loadGoogleMaps']);
+  googleMapsServiceSpy.isGoogleMapsLoaded = signal<boolean>(false);
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
+      providers: [{ provide: GoogleMapsService, useValue: googleMapsServiceSpy }]
     }).compileComponents();
+
+    fixture = TestBed.createComponent(AppComponent);
   });
 
   it('should create the app', () => {
@@ -14,16 +23,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'google-maps-app' title`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('google-maps-app');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
+  it('should call loadGoogleMaps method on initialization', () => {
+    googleMapsServiceSpy.loadGoogleMaps.and.returnValue(Promise.resolve());
     fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, google-maps-app');
-  });
+
+    expect(googleMapsServiceSpy.loadGoogleMaps).toHaveBeenCalled();
+  })
 });

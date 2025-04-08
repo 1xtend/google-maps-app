@@ -1,1 +1,49 @@
-/* You can add global styles to this file, and also import other style files */
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.wrapper {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidenav-container.mat-drawer-container {
+  background-color: #ffffff;
+  flex: 1 0 auto;
+}
+
+.sidenav-content.mat-drawer-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidenav {
+  &.mat-drawer.mat-drawer-end {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  // 30em = 480px
+  @media (max-width: 30em) {
+    &.mat-drawer {
+      width: 100%;
+    }
+  }
+}
+
+.link {
+  color: var(--mat-sys-on-background);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--mat-sys-primary);
+    text-decoration: underline;
+  }
+}

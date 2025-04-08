@@ -1,0 +1,22 @@
+:host {
+  .list {
+    display: flex;
+    flex-direction: column;
+
+    &.md {
+      gap: 0.5rem;
+    }
+
+    &:not(.md) {
+      gap: 0.25rem;
+    }
+  }
+
+  .list-link {
+    color: var(--mat-sys-primary);
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}

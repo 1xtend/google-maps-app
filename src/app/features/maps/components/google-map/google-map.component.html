@@ -1,0 +1,25 @@
+@defer (when isGoogleMapsLoaded()) {
+  <mat-expansion-panel class="accordion">
+    <mat-expansion-panel-header>Utils</mat-expansion-panel-header>
+    <mat-checkbox [(ngModel)]="directionMode">Calculate direction mode</mat-checkbox>
+  </mat-expansion-panel>
+
+  <google-map
+    #googleMap
+    [options]="mapOptions"
+    width="100%"
+    height="100%"
+    class="map"
+  >
+    @if (places$ | async; as places) {
+      @for (place of places; track place.id) {
+        <map-advanced-marker
+          [position]="{ lat: place.geo.latitude, lng: place.geo.longitude }"
+          [title]="place.name"
+          [options]="markerOptions"
+          (mapClick)="onMarkerClick($event, place)"
+        ></map-advanced-marker>
+      }
+    }
+  </google-map>
+}

@@ -1,0 +1,16 @@
+@if (details(); as details) {
+  <div class="list" [class.md]="gap() === 'md'">
+    @for (detail of details; track detail.label) {
+      @if (detail.type === 'text') {
+        <div class="list-item">
+          <b>{{ detail.label }}: </b>
+          {{ detail.value }}
+        </div>
+      }
+
+      @if (detail.type === 'link') {
+        <a [href]="detail.value" target="_blank" class="list-link">{{ detail.label }}</a>
+      }
+    }
+  </div>
+}

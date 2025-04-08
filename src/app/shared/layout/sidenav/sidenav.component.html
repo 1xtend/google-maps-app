@@ -1,0 +1,53 @@
+<h3 class="markers-quantity"><b>Markers quantity:</b> {{ placesQuantity() }}</h3>
+
+<form class="form" [formGroup]="filtersForm">
+  <mat-form-field>
+    <mat-label>Search</mat-label>
+    <input type="text" matInput formControlName="search"/>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>County</mat-label>
+    <input
+      type="text"
+      matInput
+      formControlName="county"
+      [matAutocomplete]="countyAutocomplete"
+      (input)="onFilterCounties($event)"
+      (focus)="onFilterCounties($event)"
+    />
+    <mat-autocomplete #countyAutocomplete="matAutocomplete" requireSelection autoActiveFirstOption>
+      @for (county of filteredCounties(); track county) {
+        <mat-option [value]="county">{{ county }}</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Street Address</mat-label>
+    <input type="text" matInput formControlName="streetAddress"/>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Tags</mat-label>
+    <mat-select formControlName="tags" multiple>
+      @for (tag of tagsList; track tag) {
+        <mat-option [value]="tag" [disabled]="placesLoading()">{{ tag }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <div class="sidenav-actions">
+    <button type="button" mat-flat-button (click)="onResetFilters()" [disabled]="placesLoading()">Reset filters</button>
+    <button
+      type="button"
+      mat-icon-button
+      matTooltip="Refresh markers"
+      matTooltipPosition="left"
+      [disabled]="placesLoading()"
+      (click)="onReload()"
+    >
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+</form>
