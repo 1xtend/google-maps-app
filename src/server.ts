@@ -85,6 +85,24 @@ app.get('/api/places', async (req: Request, res: Response) => {
   }
 })
 
+app.get('/api/place/:placeId', async (req: Request, res: Response) => {
+  const placeId: string | undefined = req.params['placeId'];
+
+  if (!placeId) {
+    res.status(404).json({ error: 'You must provide place id' });
+  }
+
+  try {
+    const response = await fetch(apiUrl);
+    const collection: PlacesCollection = await response.json();
+    const place: Place | undefined = collection.value?.find((place) => place.id === placeId);
+
+    res.status(200).json(place);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load data' });
+  }
+})
+
 /**
  * Serve static files from /browser
  */

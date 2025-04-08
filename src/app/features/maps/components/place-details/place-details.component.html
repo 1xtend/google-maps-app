@@ -1,1 +1,22 @@
-<p>place-details works!</p>
+@if (place$ | async; as state) {
+  @if (state.loading) {
+    <div>Loading...</div>
+  }
+
+  @if (state.error) {
+    <div>Failed to load place</div>
+  }
+
+  @if (state.data; as place) {
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{ place.name }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ place.description }}</p>
+
+        <app-place-details-list [place]="place" gap="md"></app-place-details-list>
+      </mat-card-content>
+    </mat-card>
+  }
+}
