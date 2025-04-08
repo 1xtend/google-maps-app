@@ -1,7 +1,7 @@
 <mat-card class="card">
   <mat-card-header class="card-header">
     <mat-card-title>
-      <a [href]="place().url" target="_blank" class="card-link">{{ place().name }}</a>
+      <a [routerLink]="['/place-details', this.place().id]" class="link">{{ place().name }}</a>
     </mat-card-title>
   </mat-card-header>
   <mat-card-content class="card-content">

@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject, PLATFORM_ID, viewChild } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnDestroy,
+  PLATFORM_ID,
+  viewChild
+} from '@angular/core';
 import { GoogleMap, GoogleMapsModule } from '@angular/google-maps';
 import { GoogleMapsService } from '../../services/google-maps.service';
 import { PlacesService } from '../../services/places.service';
@@ -16,16 +24,16 @@ import { PlaceTooltipService } from '../../services/place-tooltip.service';
   providers: [PlaceTooltipService],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GoogleMapComponent {
+export class GoogleMapComponent implements OnDestroy {
   private googleMapsService = inject(GoogleMapsService);
   private placesService = inject(PlacesService);
   private placesFilterService = inject(PlacesFilterService);
   private placeTooltipService = inject(PlaceTooltipService);
   private platformId = inject(PLATFORM_ID);
 
-  private googleMap = viewChild<GoogleMap>('googleMap')
+  private googleMap = viewChild<GoogleMap>('googleMap');
 
-  isGoogleMapsLoaded = this.googleMapsService.isGoogleMapsLoaded;
+  isGoogleMapsLoaded = this.googleMapsService.isLoaded;
 
   private readonly defaultLocation: google.maps.LatLngLiteral = { lat: 53.4494762, lng: -7.5029786 }; // Geographical centre of Ireland
 
@@ -40,6 +48,12 @@ export class GoogleMapComponent {
   }
 
   readonly places$: Observable<Place[]> = this.getPlaces();
+
+  constructor() {
+    afterNextRender(async () => {
+      await this.googleMapsService.loadGoogleMaps();
+    })
+  }
 
   onMarkerClick(e: google.maps.MapMouseEvent, place: Place): void {
     const el: HTMLElement | null = e.domEvent.target as HTMLElement;
@@ -60,5 +74,9 @@ export class GoogleMapComponent {
         map(([_, filters]) => filters)
       )
     ).pipe(switchMap((filters) => this.placesService.getPlaces(filters)))
+  }
+
+  ngOnDestroy(): void {
+    this.placeTooltipService.cleanSubscriptions();
   }
 }

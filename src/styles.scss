@@ -33,3 +33,13 @@ body {
     }
   }
 }
+
+.link {
+  color: var(--mat-sys-on-background);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--mat-sys-primary);
+    text-decoration: underline;
+  }
+}

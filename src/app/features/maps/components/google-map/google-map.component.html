@@ -1,4 +1,4 @@
-@if (isGoogleMapsLoaded()) {
+@defer (when isGoogleMapsLoaded()) {
   <google-map
     #googleMap
     [options]="mapOptions"

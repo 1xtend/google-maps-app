@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Place } from '../../models/place.interface';
 import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-place-tooltip',
@@ -8,7 +9,8 @@ import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/m
     MatCard,
     MatCardHeader,
     MatCardTitle,
-    MatCardContent
+    MatCardContent,
+    RouterLink
   ],
   templateUrl: './place-tooltip.component.html',
   styleUrl: './place-tooltip.component.scss',

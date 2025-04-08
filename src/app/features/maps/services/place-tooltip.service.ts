@@ -1,7 +1,7 @@
 import { ComponentRef, inject, Injectable, Renderer2, ViewContainerRef } from '@angular/core';
 import { Place } from '../models/place.interface';
 import { PlaceTooltipComponent } from '../components/place-tooltip/place-tooltip.component';
-import { filter, fromEvent, Subscription } from 'rxjs';
+import { filter, first, fromEvent, Subscription } from 'rxjs';
 import { DOCUMENT } from '@angular/common';
 import { TooltipPlacement } from '../models/tooltip-placement.enum';
 import { GoogleMap } from '@angular/google-maps';
@@ -18,7 +18,10 @@ export class PlaceTooltipService {
   private markerEl: HTMLElement | null = null;
 
   private documentMousedownSubscription: Subscription | null = null;
-  private zoomChangesSubscription: Subscription | null = null;
+  private zoomChangeSubscription: Subscription | null = null;
+  private windowResizeSubscription: Subscription | null = null;
+
+  private subscriptions: Subscription[] = [];
 
   private readonly padding: number = 16;
 
@@ -35,6 +38,7 @@ export class PlaceTooltipService {
 
     this.hideTooltipOnMouseDown(markerEl, tooltipEl);
     this.hideTooltipOnZoom(googleMap);
+    this.hideTooltipOnWindowResize();
 
     this.tooltipRef = tooltip;
     this.markerEl = markerEl;
@@ -54,16 +58,8 @@ export class PlaceTooltipService {
     this.cleanSubscriptions();
   }
 
-  private cleanSubscriptions(): void {
-    if (this.documentMousedownSubscription) {
-      this.documentMousedownSubscription.unsubscribe();
-      this.documentMousedownSubscription = null;
-    }
-
-    if (this.zoomChangesSubscription) {
-      this.zoomChangesSubscription.unsubscribe();
-      this.zoomChangesSubscription = null;
-    }
+  cleanSubscriptions(): void {
+    this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
   private hideTooltipOnMouseDown(markerEl: Node, tooltipEl: Node): void {
@@ -73,14 +69,22 @@ export class PlaceTooltipService {
         const clickedOutsideTooltip: boolean = !tooltipEl.contains(target);
         const clickedOutsideMarker: boolean = !markerEl.contains(target);
         return clickedOutsideTooltip && clickedOutsideMarker;
-      })
+      }),
+      first()
     ).subscribe(() => {
       this.hide();
     });
+    this.subscriptions.push(this.documentMousedownSubscription);
   }
 
   private hideTooltipOnZoom(googleMap: GoogleMap): void {
-    this.zoomChangesSubscription = googleMap.zoomChanged.subscribe(() => this.hide());
+    this.zoomChangeSubscription = googleMap.zoomChanged.pipe(first()).subscribe(() => this.hide());
+    this.subscriptions.push(this.zoomChangeSubscription);
+  }
+
+  private hideTooltipOnWindowResize(): void {
+    this.windowResizeSubscription = fromEvent(window, 'resize').pipe(first()).subscribe(() => this.hide());
+    this.subscriptions.push(this.windowResizeSubscription);
   }
 
   private positionTooltip(tooltipEl: HTMLElement, containerEl: HTMLElement, e: PointerEvent): void {
