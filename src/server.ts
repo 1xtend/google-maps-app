@@ -1,5 +1,5 @@
 import {
-  AngularNodeAppEngine,
+  AngularNodeAppEngine, createNodeRequestHandler,
   isMainModule,
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
@@ -9,8 +9,6 @@ import { fileURLToPath } from 'node:url';
 import { Place } from './app/features/maps/models/place.interface';
 import { PlacesCollection } from './app/features/maps/models/places-collection.interface';
 import { environment } from './environments/environment';
-import { AngularAppEngine, createRequestHandler } from '@angular/ssr';
-import { getContext } from '@netlify/angular-runtime/context';
 
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
@@ -18,15 +16,6 @@ const browserDistFolder = resolve(serverDistFolder, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 const apiUrl: string = environment.placesApiUrl;
-
-const angularAppEngine = new AngularAppEngine()
-
-export async function netlifyAppEngineHandler(request: Request): Promise<Response> {
-  const context = getContext()
-
-  const result = await angularAppEngine.handle(request, context)
-  return result || new Response('Not found', { status: 404 })
-}
 
 function normalizeString(value: string): string {
   return value.trim().toLowerCase();
@@ -149,4 +138,4 @@ if (isMainModule(import.meta.url)) {
 /**
  * The request handler used by the Angular CLI (dev-server and during build).
  */
-export const reqHandler = createRequestHandler(netlifyAppEngineHandler);
+export const reqHandler = createNodeRequestHandler(app);
