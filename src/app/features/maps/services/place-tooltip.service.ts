@@ -66,7 +66,7 @@ export class PlaceTooltipService {
   }
 
   private setupOutsideClickListener(markerEl: Node, tooltipEl: Node): void {
-    const subscription = fromEvent(this.document, 'mousedown').pipe(
+    const listener = (eventName: 'mousedown' | 'touchstart') => fromEvent(this.document, eventName).pipe(
       filter((e) => {
         const target: Node | null = e.target as Node;
         const clickedOutsideTooltip: boolean = !tooltipEl.contains(target);
@@ -76,8 +76,10 @@ export class PlaceTooltipService {
       first()
     ).subscribe(() => {
       this.hide();
-    });
-    this.subscriptions.push(subscription);
+    })
+
+    this.subscriptions.push(listener('mousedown'));
+    this.subscriptions.push(listener('touchstart'));
   }
 
   private setupZoomChangeListener(googleMap: GoogleMap): void {
