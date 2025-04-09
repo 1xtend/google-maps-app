@@ -1,4 +1,0 @@
-[build]
-  command="ng build"
-  function="netlify/functions"
-  publish="dist/google-maps-app/browser"
