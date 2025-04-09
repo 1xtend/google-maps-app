@@ -5,6 +5,6 @@ import('../dist/google-maps-app/server/server.mjs')
     throw error;
   });
 export default async (req, res) => {
-  const { app } = await import('../dist/google-maps-app/server/server.mjs');
-  return app(req, res);
+  const { reqHandler } = await import('../dist/google-maps-app/server/server.mjs');
+  return reqHandler(req, res);
 };
