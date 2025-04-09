@@ -1,7 +1,7 @@
 <mat-toolbar>
   <a routerLink="/" mat-button class="home-link">Google Maps App</a>
 
-  @if (isMenuButtonShown()) {
+  @if (showMenuButton()) {
     <button mat-icon-button (click)="menuButtonClick.emit($event)">
       <mat-icon>menu</mat-icon>
     </button>

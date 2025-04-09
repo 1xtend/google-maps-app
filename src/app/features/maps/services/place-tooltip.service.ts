@@ -7,6 +7,11 @@ import { TooltipPlacement } from '../models/tooltip-placement.enum';
 import { GoogleMap } from '@angular/google-maps';
 import { SelectedMarkersService } from './selected-markers.service';
 
+interface Position {
+  top: number;
+  left: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -18,15 +23,12 @@ export class PlaceTooltipService {
 
   private tooltipRef: ComponentRef<PlaceTooltipComponent> | null = null;
 
-  private documentMousedownSubscription: Subscription | null = null;
-  private zoomChangeSubscription: Subscription | null = null;
-  private windowResizeSubscription: Subscription | null = null;
-
   private subscriptions: Subscription[] = [];
 
   private readonly padding: number = 16;
+  private readonly offset: number = 6;
 
-  show(markerEl: HTMLElement, place: Place, googleMap: GoogleMap, e: PointerEvent): void {
+  show(markerEl: HTMLElement, place: Place, googleMap: GoogleMap): void {
     this.hide();
 
     const tooltip = this.viewContainerRef.createComponent(PlaceTooltipComponent);
@@ -37,12 +39,10 @@ export class PlaceTooltipService {
     this.setTooltipStyles(tooltipEl, 0, 0, 'hidden');
 
     setTimeout(() => {
-      this.positionTooltip(tooltipEl, this.document.body, e);
-    }, 0)
+      this.positionTooltip(markerEl, tooltipEl, googleMap.googleMap?.getDiv() ?? this.document.body);
+    }, 0);
 
-    this.hideTooltipOnMouseDown(markerEl, tooltipEl);
-    this.hideTooltipOnZoom(googleMap);
-    this.hideTooltipOnWindowResize();
+    this.setupEventListeners(markerEl, tooltipEl, googleMap);
 
     this.tooltipRef = tooltip;
   }
@@ -62,10 +62,11 @@ export class PlaceTooltipService {
 
   cleanSubscriptions(): void {
     this.subscriptions.forEach((subscription) => subscription.unsubscribe());
+    this.subscriptions = [];
   }
 
-  private hideTooltipOnMouseDown(markerEl: Node, tooltipEl: Node): void {
-    this.documentMousedownSubscription = fromEvent(this.document, 'mousedown').pipe(
+  private setupOutsideClickListener(markerEl: Node, tooltipEl: Node): void {
+    const listener = (eventName: 'mousedown' | 'touchstart') => fromEvent(this.document, eventName).pipe(
       filter((e) => {
         const target: Node | null = e.target as Node;
         const clickedOutsideTooltip: boolean = !tooltipEl.contains(target);
@@ -75,49 +76,45 @@ export class PlaceTooltipService {
       first()
     ).subscribe(() => {
       this.hide();
-    });
-    this.subscriptions.push(this.documentMousedownSubscription);
+    })
+
+    this.subscriptions.push(listener('mousedown'));
+    this.subscriptions.push(listener('touchstart'));
   }
 
-  private hideTooltipOnZoom(googleMap: GoogleMap): void {
-    this.zoomChangeSubscription = googleMap.zoomChanged.pipe(first()).subscribe(() => this.hide());
-    this.subscriptions.push(this.zoomChangeSubscription);
+  private setupZoomChangeListener(googleMap: GoogleMap): void {
+    const subscription = googleMap.zoomChanged.pipe(first()).subscribe(() => this.hide());
+    this.subscriptions.push(subscription);
   }
 
-  private hideTooltipOnWindowResize(): void {
-    this.windowResizeSubscription = fromEvent(window, 'resize').pipe(first()).subscribe(() => this.hide());
-    this.subscriptions.push(this.windowResizeSubscription);
+  private setupWindowResizeListener(): void {
+    const subscription = fromEvent(window, 'resize').pipe(first()).subscribe(() => this.hide());
+    this.subscriptions.push(subscription);
   }
 
-  private positionTooltip(tooltipEl: HTMLElement, containerEl: HTMLElement, e: PointerEvent): void {
-    const targetPos = { top: e.clientY, left: e.clientX };
+  private positionTooltip(markerEl: HTMLElement, tooltipEl: HTMLElement, containerEl: HTMLElement): void {
+    const markerRect = markerEl.getBoundingClientRect();
     const tooltipRect = tooltipEl.getBoundingClientRect();
     const containerRect = containerEl.getBoundingClientRect();
 
-    const placement: TooltipPlacement = this.getBestPlacement(targetPos, tooltipRect, containerRect);
-    const position: { top: number, left: number } = this.calculatePosition(targetPos, tooltipRect, placement);
-    const adjustedPosition: { top: number, left: number } = this.adjustPosition(position, tooltipRect, containerRect);
+    const placement: TooltipPlacement = this.getBestPlacement(tooltipRect, markerRect, containerRect);
+    const position: Position = this.calculatePosition(tooltipRect, markerRect, placement);
+    const adjustedPosition: Position = this.adjustPosition(position, tooltipRect, containerRect);
 
     this.setTooltipStyles(tooltipEl, adjustedPosition.top, adjustedPosition.left, 'visible');
   }
 
-  private getBestPlacement(targetPos: {
-    top: number,
-    left: number
-  }, tooltipRect: DOMRect, containerRect: DOMRect): TooltipPlacement {
-    const spaceTop = targetPos.top - containerRect.top;
-    const spaceRight = containerRect.right - targetPos.left;
-    const spaceBottom = containerRect.bottom - targetPos.top;
-    const spaceLeft = targetPos.left - containerRect.left;
-
-    if (spaceTop >= tooltipRect.height + this.padding) {
-      return TooltipPlacement.TOP;
-    }
+  private getBestPlacement(tooltipRect: DOMRect, markerRect: DOMRect, containerRect: DOMRect): TooltipPlacement {
+    const spaceTop = markerRect.top - containerRect.top;
+    const spaceRight = containerRect.right - markerRect.right;
+    const spaceBottom = containerRect.bottom - markerRect.bottom;
+    const spaceLeft = markerRect.left - containerRect.left;
 
     const spaces = [
-      { placement: TooltipPlacement.RIGHT, space: spaceRight - tooltipRect.width - this.padding },
-      { placement: TooltipPlacement.BOTTOM, space: spaceBottom - tooltipRect.height - this.padding },
-      { placement: TooltipPlacement.LEFT, space: spaceLeft - tooltipRect.width - this.padding }
+      { placement: TooltipPlacement.TOP, space: this.calculatePlacementSpace(spaceTop, tooltipRect.height) },
+      { placement: TooltipPlacement.RIGHT, space: this.calculatePlacementSpace(spaceRight, tooltipRect.width) },
+      { placement: TooltipPlacement.BOTTOM, space: this.calculatePlacementSpace(spaceBottom, tooltipRect.height) },
+      { placement: TooltipPlacement.LEFT, space: this.calculatePlacementSpace(spaceLeft, tooltipRect.width) }
     ];
 
     spaces.sort((a, b) => b.space - a.space);
@@ -125,63 +122,87 @@ export class PlaceTooltipService {
     return spaces[0].space > 0 ? spaces[0].placement : TooltipPlacement.TOP;
   }
 
-  private calculatePosition(targetPos: {
-    top: number,
-    left: number
-  }, tooltipRect: DOMRect, placement: TooltipPlacement): { top: number, left: number } {
+  private calculatePlacementSpace(space: number, tooltipSize: number) {
+    return space - tooltipSize - this.padding - this.offset;
+  }
+
+  private calculatePosition(tooltipRect: DOMRect, markerRect: DOMRect, placement: TooltipPlacement): Position {
     switch (placement) {
-      case TooltipPlacement.TOP: {
-        return {
-          top: targetPos.top - tooltipRect.height,
-          left: targetPos.left - (tooltipRect.width / 2),
-        }
-      }
-      case TooltipPlacement.RIGHT: {
-        return {
-          top: targetPos.top - (tooltipRect.height / 2),
-          left: targetPos.left
-        }
-      }
-      case TooltipPlacement.BOTTOM: {
-        return {
-          top: targetPos.top,
-          left: targetPos.left - (tooltipRect.width / 2)
-        }
-      }
-      case TooltipPlacement.LEFT: {
-        return {
-          top: targetPos.top - (tooltipRect.height / 2),
-          left: targetPos.left - tooltipRect.width
-        }
-      }
+      case TooltipPlacement.TOP:
+        return this.calculateTopPosition(tooltipRect, markerRect);
+      case TooltipPlacement.RIGHT:
+        return this.calculateRightPosition(tooltipRect, markerRect);
+      case TooltipPlacement.BOTTOM:
+        return this.calculateBottomPosition(tooltipRect, markerRect);
+      case TooltipPlacement.LEFT:
+        return this.calculateLeftPosition(tooltipRect, markerRect);
     }
   }
 
-  private adjustPosition(position: { top: number, left: number }, tooltipRect: DOMRect, containerRect: DOMRect): {
-    top: number,
-    left: number
-  } {
+  private calculateTopPosition(tooltipRect: DOMRect, markerRect: DOMRect): Position {
     return {
-      top: Math.max(
-        containerRect.top + this.padding,
-        Math.min(
-          position.top,
-          containerRect.bottom - tooltipRect.height - this.padding
-        )
-      ),
-      left: Math.max(
-        containerRect.left + this.padding,
-        Math.min(
-          position.left,
-          containerRect.right - tooltipRect.width - this.padding
-        )
-      )
-    }
+      top: markerRect.top - tooltipRect.height - this.offset,
+      left: this.calculateHorizontalCenter(tooltipRect, markerRect),
+    };
+  }
+
+  private calculateBottomPosition(tooltipRect: DOMRect, markerRect: DOMRect): Position {
+    return {
+      top: markerRect.bottom + this.offset,
+      left: this.calculateHorizontalCenter(tooltipRect, markerRect),
+    };
+  }
+
+  private calculateLeftPosition(tooltipRect: DOMRect, markerRect: DOMRect): Position {
+    return {
+      top: this.calculateVerticalCenter(tooltipRect, markerRect),
+      left: markerRect.left - tooltipRect.width - this.offset
+    };
+  }
+
+  private calculateRightPosition(tooltipRect: DOMRect, markerRect: DOMRect): Position {
+    return {
+      top: this.calculateVerticalCenter(tooltipRect, markerRect),
+      left: markerRect.right + this.offset
+    };
+  }
+
+  private calculateHorizontalCenter(tooltipRect: DOMRect, markerRect: DOMRect): number {
+    return markerRect.left + (markerRect.width / 2) - (tooltipRect.width / 2);
+  }
+
+  private calculateVerticalCenter(tooltipRect: DOMRect, markerRect: DOMRect): number {
+    return markerRect.top + (markerRect.height / 2) - (tooltipRect.height / 2);
+  }
+
+  private adjustPosition(position: Position, tooltipRect: DOMRect, containerRect: DOMRect): Position {
+    return {
+      top: this.adjustVerticalPosition(position.top, containerRect, tooltipRect),
+      left: this.adjustHorizontalPosition(position.left, containerRect, tooltipRect)
+    };
+  }
+
+  private adjustVerticalPosition(top: number, containerRect: DOMRect, tooltipRect: DOMRect): number {
+    const minTop = containerRect.top + this.padding;
+    const maxTop = containerRect.bottom - tooltipRect.height - this.padding;
+    return Math.max(minTop, Math.min(top, maxTop));
+  }
+
+  private adjustHorizontalPosition(left: number, containerRect: DOMRect, tooltipRect: DOMRect): number {
+    const minLeft = containerRect.left + this.padding;
+    const maxLeft = containerRect.right - tooltipRect.width - this.padding;
+    return Math.max(minLeft, Math.min(left, maxLeft));
   }
 
   private setTooltipStyles(tooltipEl: HTMLElement, top: number, left: number, visibility: 'hidden' | 'visible'): void {
     this.renderer.setStyle(tooltipEl, 'top', top > 0 ? `${ top }px` : top);
     this.renderer.setStyle(tooltipEl, 'left', left > 0 ? `${ left }px` : left);
     this.renderer.setStyle(tooltipEl, 'visibility', visibility);
+  }
+
+  private setupEventListeners(markerEl: HTMLElement, tooltipEl: HTMLElement, googleMap: GoogleMap): void {
+    this.setupOutsideClickListener(markerEl, tooltipEl);
+    this.setupZoomChangeListener(googleMap);
+    this.setupWindowResizeListener();
   }
 }
