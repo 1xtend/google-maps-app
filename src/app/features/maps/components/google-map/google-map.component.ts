@@ -81,7 +81,7 @@ export class GoogleMapComponent implements OnDestroy {
       return;
     }
 
-    this.handleMarkerClick(el, place, googleMap, e.domEvent as PointerEvent);
+    this.handleMarkerClick(el, place, googleMap);
   }
 
   onClearMultiplySelection(): void {
@@ -105,9 +105,9 @@ export class GoogleMapComponent implements OnDestroy {
     this.setDirection(googleMap);
   }
 
-  private handleMarkerClick(el: HTMLElement, place: Place, googleMap: GoogleMap, e: PointerEvent): void {
+  private handleMarkerClick(el: HTMLElement, place: Place, googleMap: GoogleMap): void {
     if (!this.directionMode()) {
-      this.placeTooltipService.show(el, place, googleMap, e);
+      this.placeTooltipService.show(el, place, googleMap);
       return;
     }
 
