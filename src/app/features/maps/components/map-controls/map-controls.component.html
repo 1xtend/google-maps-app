@@ -1,0 +1,24 @@
+<mat-expansion-panel #accordion class="accordion">
+  <mat-expansion-panel-header>Utils</mat-expansion-panel-header>
+
+  @defer (when accordion.opened) {
+    <mat-checkbox [(ngModel)]="directionMode" (ngModelChange)="directionModeChange.emit($event)">
+      Calculate direction mode
+    </mat-checkbox>
+
+    @if (directionMode()) {
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>Travel mode</mat-label>
+        <mat-select [(ngModel)]="travelMode" (ngModelChange)="travelModeChange.emit($event)">
+          @for (mode of travelModeList; track $index) {
+            <mat-option [value]="mode">{{ mode }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (selectedMarkersCount() > 0) {
+        <button type="button" mat-flat-button (click)="clearMultiplySelection.emit()">Clear selection</button>
+      }
+    }
+  }
+</mat-expansion-panel>
