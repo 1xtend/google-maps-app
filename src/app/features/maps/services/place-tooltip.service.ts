@@ -37,8 +37,8 @@ export class PlaceTooltipService {
     this.setTooltipStyles(tooltipEl, 0, 0, 'hidden');
 
     setTimeout(() => {
-      this.positionTooltip(tooltipEl, this.document.body, e);
-    }, 0)
+      this.positionTooltip(tooltipEl, googleMap.googleMap?.getDiv() ?? this.document.body, e);
+    }, 0);
 
     this.hideTooltipOnMouseDown(markerEl, tooltipEl);
     this.hideTooltipOnZoom(googleMap);

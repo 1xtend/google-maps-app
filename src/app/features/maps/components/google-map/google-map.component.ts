@@ -57,7 +57,8 @@ export class GoogleMapComponent implements OnDestroy {
   readonly mapOptions: google.maps.MapOptions = {
     center: this.defaultLocation,
     zoom: 7,
-    mapId: 'GOOGLE_MAP'
+    mapId: 'GOOGLE_MAP',
+    gestureHandling: 'greedy'
   }
 
   readonly markerOptions: google.maps.marker.AdvancedMarkerElementOptions = {
