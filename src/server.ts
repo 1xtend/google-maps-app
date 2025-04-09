@@ -1,13 +1,9 @@
 import {
-  AngularNodeAppEngine,
-  createNodeRequestHandler,
-  isMainModule,
-  writeResponseToNodeResponse,
+  AngularNodeAppEngine, createNodeRequestHandler, writeResponseToNodeResponse,
 } from '@angular/ssr/node';
 import express from 'express';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Request, Response } from 'express';
 import { Place } from './app/features/maps/models/place.interface';
 import { PlacesCollection } from './app/features/maps/models/places-collection.interface';
 import { environment } from './environments/environment';
@@ -23,7 +19,7 @@ function normalizeString(value: string): string {
   return value.trim().toLowerCase();
 }
 
-app.get('/api/places', async (req: Request, res: Response) => {
+app.get('/api/places', async (req, res) => {
   const { search, county, streetAddress, tags } = req.query;
 
   const normalizedSearch: string | undefined = search && typeof search === 'string' ? normalizeString(search) : undefined;
@@ -85,7 +81,7 @@ app.get('/api/places', async (req: Request, res: Response) => {
   }
 })
 
-app.get('/api/place/:placeId', async (req: Request, res: Response) => {
+app.get('/api/place/:placeId', async (req, res) => {
   const placeId: string | undefined = req.params['placeId'];
 
   if (!placeId) {
@@ -130,14 +126,14 @@ app.use('/**', (req, res, next) => {
  * Start the server if this module is the main entry point.
  * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
  */
-if (isMainModule(import.meta.url)) {
-  const port = process.env['PORT'] || 4000;
-  app.listen(port, () => {
-    console.log(`Node Express server listening on http://localhost:${ port }`);
-  });
-}
+// if (isMainModule(import.meta.url)) {
+//   const port = process.env['PORT'] || 4000;
+//   app.listen(port, () => {
+//     console.log(`Node Express server listening on http://localhost:${ port }`);
+//   });
+// }
 
 /**
- * Request handler used by the Angular CLI (for dev-server and during build) or Firebase Cloud Functions.
+ * The request handler used by the Angular CLI (dev-server and during build).
  */
 export const reqHandler = createNodeRequestHandler(app);

@@ -4,10 +4,12 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build-dev": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:google-maps-app": "node dist/google-maps-app/server/server.mjs"
+    "generate-env": "node ./scripts/generate-env.js",
+    "serve:ssr:google-maps-app": "node dist/google-maps-app/server/server.mjs",
+    "vercel-build": "npm run generate-env && ng build && node dist/google-maps-app/server/server.mjs"
   },
   "private": true,
   "dependencies": {
@@ -23,6 +25,7 @@
     "@angular/platform-server": "^19.2.0",
     "@angular/router": "^19.2.0",
     "@angular/ssr": "^19.2.4",
+    "@vercel/static-build": "^2.7.6",
     "express": "^4.18.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
