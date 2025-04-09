@@ -2,9 +2,9 @@ import { ChangeDetectionStrategy, Component, inject, output } from '@angular/cor
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatAnchor, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { NavigationEnd, Router, RouterLink } from '@angular/router';
-import { distinctUntilChanged, filter, map, Observable } from 'rxjs';
+import { RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { RouterUtilsService } from '../../../core/services/router-utils.service';
 
 @Component({
   selector: 'app-navbar',
@@ -20,17 +20,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavbarComponent {
-  private router = inject(Router);
+  private routerUtilsService = inject(RouterUtilsService);
 
   menuButtonClick = output<Event>();
 
-  isMenuButtonShown = toSignal<boolean>(this.showMenuButton());
-
-  private showMenuButton(): Observable<boolean> {
-    return this.router.events.pipe(
-      filter((event) => event instanceof NavigationEnd),
-      map((event) => event.url.length === 1),
-      distinctUntilChanged()
-    );
-  }
+  showMenuButton = toSignal<boolean>(this.routerUtilsService.hasRoute('/'));
 }

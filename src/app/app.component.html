@@ -1,14 +1,12 @@
-<div class="wrapper">
-  <app-navbar (menuButtonClick)="sidenav.toggle(!sidenav.opened)"></app-navbar>
+<app-navbar (menuButtonClick)="sidenav.toggle(!sidenav.opened)" class="navbar"></app-navbar>
 
-  <mat-sidenav-container class="sidenav-container">
-    <mat-sidenav #sidenav position="end" class="sidenav">
-      @defer (when sidenav.opened) {
-        <app-sidenav></app-sidenav>
-      }
-    </mat-sidenav>
-    <mat-sidenav-content class="sidenav-content">
-      <router-outlet></router-outlet>
-    </mat-sidenav-content>
-  </mat-sidenav-container>
-</div>
+<mat-sidenav-container class="sidenav-container" [class.full-height]="sidenavFullHeight()">
+  <mat-sidenav #sidenav position="end" class="sidenav">
+    @defer (when sidenav.opened) {
+      <app-sidenav></app-sidenav>
+    }
+  </mat-sidenav>
+  <mat-sidenav-content class="sidenav-content">
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>

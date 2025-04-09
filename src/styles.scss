@@ -1,3 +1,11 @@
+:root {
+  --navbar-height: 64px;
+
+  @media (max-width: 599px) {
+    --navbar-height: 56px;
+  }
+}
+
 html, body {
   height: 100%;
 }
@@ -7,21 +15,17 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
-.wrapper {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+.navbar {
+  display: block;
+  height: var(--navbar-height);
 }
 
-.sidenav-container.mat-drawer-container {
+.sidenav-container {
   background-color: #ffffff;
-  flex: 1 0 auto;
-}
 
-.sidenav-content.mat-drawer-content {
-  display: flex;
-  flex-direction: column;
+  &.full-height {
+    height: calc(100% - var(--navbar-height));
+  }
 }
 
 .sidenav {

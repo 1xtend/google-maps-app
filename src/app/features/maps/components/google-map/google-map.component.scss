@@ -1,14 +1,16 @@
 :host {
-  display: flex;
-  flex-direction: column;
+  display: block;
+  height: 100%;
   padding: 1rem;
-  flex: 1 0 auto;
 
   .map {
-    flex: 1 0 auto;
+    display: block;
+    height: 100%;
+    padding-bottom: 1rem;
   }
 
   .map-controls:not(:last-child) {
+    display: block;
     margin-bottom: 1rem;
   }
 
