@@ -1,14 +1,18 @@
 {
   "version": 2,
-  "builds": [
+  "public": true,
+  "name": "google-maps-app",
+  "rewrites": [
     {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist/google-maps-app/browser"
-      }
+      "source": "/(.*)",
+      "destination": "/api"
     }
   ],
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "dist/google-maps-app/**"
+    }
+  },
   "routes": [
     {
       "src": "/(.*)",
