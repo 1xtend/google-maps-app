@@ -12,11 +12,5 @@
     "api/index.js": {
       "includeFiles": "dist/google-maps-app/**"
     }
-  },
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ]
+  }
 }
