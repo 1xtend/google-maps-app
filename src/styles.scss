@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 :root {
   --navbar-height: 64px;
 
@@ -10,9 +12,23 @@ html, body {
   height: 100%;
 }
 
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$green-palette,
+      tertiary: mat.$orange-palette,
+      theme-type: light,
+    ),
+    typography: Roboto,
+    density: 0
+  ));
+}
+
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: var(--mat-sys-surface-variant);
+  color: var(--mat-sys-on-surface);
 }
 
 .navbar {
@@ -21,7 +37,9 @@ body {
 }
 
 .sidenav-container {
-  background-color: #ffffff;
+  &.mat-drawer-container {
+    background: inherit;
+  }
 
   &.full-height {
     height: calc(100% - var(--navbar-height));
