@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { EqualityService } from './equality.service';
 
-fdescribe('EqualityService', () => {
+describe('EqualityService', () => {
   let service: EqualityService;
 
   beforeEach(() => {
