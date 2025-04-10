@@ -6,7 +6,6 @@ import { PlaceDetails } from '../models/place-details.inteface';
   providedIn: 'root'
 })
 export class PlaceDetailsService {
-
   getDetailsArray(place: Place): PlaceDetails[] {
     const detailsArray: PlaceDetails[] = [];
 
