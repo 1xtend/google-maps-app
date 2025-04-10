@@ -25,6 +25,11 @@ body {
 
   &.full-height {
     height: calc(100% - var(--navbar-height));
+
+    .sidenav-content {
+      display: flex;
+      flex-direction: column;
+    }
   }
 }
 
