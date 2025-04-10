@@ -46,8 +46,8 @@ export class SelectedMarkersService {
         })
       }
 
-      return []
-    })
+      return [];
+    });
   }
 
   hasMarker(el: HTMLElement): boolean {
