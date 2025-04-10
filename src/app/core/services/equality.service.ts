@@ -46,12 +46,19 @@ export class EqualityService {
 
     // Objects
     if (typeof a === 'object' && typeof b === 'object') {
-      for (const key of Object.keys(a)) {
+      const keysA = Object.keys(a);
+      const keysB = Object.keys(b);
+
+      if (keysA.length !== keysB.length) {
+        return false;
+      }
+
+      for (const key of keysA) {
         const valueA = a[key];
         const valueB = b[key];
 
         // Check inner fields recursively
-        if (!this.deepEqual(valueA, valueB)) {
+        if (b.hasOwnProperty(key) && !this.deepEqual(valueA, valueB)) {
           return false;
         }
       }
@@ -61,5 +68,4 @@ export class EqualityService {
 
     return true;
   }
-
 }

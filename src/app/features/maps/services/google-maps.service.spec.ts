@@ -29,7 +29,7 @@ describe('GoogleMapsService', () => {
     });
 
     it('should resolve promise if isLoaded is true', async () => {
-      asAny(service).isLoaded.set(true);
+      asAny(service)._isLoaded.set(true);
       await service.loadGoogleMaps();
       expect(scriptCreateSpy).not.toHaveBeenCalled();
     });
@@ -38,7 +38,7 @@ describe('GoogleMapsService', () => {
       await service.loadGoogleMaps();
 
       expect(scriptCreateSpy).toHaveBeenCalled();
-      expect(service.isGoogleMapsLoaded()).toBeTrue();
+      expect(service.isLoaded()).toBeTrue();
     })
   })
 });

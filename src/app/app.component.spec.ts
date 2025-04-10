@@ -1,32 +1,42 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-import { GoogleMapsService } from './features/maps/services/google-maps.service';
-import { signal } from '@angular/core';
+import { RouterUtilsService } from './core/services/router-utils.service';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 
 describe('AppComponent', () => {
+  let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
-  const googleMapsServiceSpy = jasmine.createSpyObj('GoogleMapsService', ['loadGoogleMaps']);
-  googleMapsServiceSpy.isGoogleMapsLoaded = signal<boolean>(false);
+
+  let routerUtilsServiceMock: jasmine.SpyObj<RouterUtilsService>;
 
   beforeEach(async () => {
+    routerUtilsServiceMock = jasmine.createSpyObj('RouterUtilsService', ['hasRoute']);
+    routerUtilsServiceMock.hasRoute.and.returnValue(of(true));
+
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [{ provide: GoogleMapsService, useValue: googleMapsServiceSpy }]
+      providers: [
+        { provide: RouterUtilsService, useValue: routerUtilsServiceMock },
+        { provide: ActivatedRoute, useValue: {} }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AppComponent);
+    component = fixture.componentInstance;
   });
 
   it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(component).toBeTruthy();
   });
 
-  it('should call loadGoogleMaps method on initialization', () => {
-    googleMapsServiceSpy.loadGoogleMaps.and.returnValue(Promise.resolve());
-    fixture.detectChanges();
+  it('should set sidenavFullHeight to true when routerUtilsServiceMock.hasRoute returns true', () => {
+    routerUtilsServiceMock.hasRoute.and.returnValue(of(true));
+    expect(component.sidenavFullHeight()).toBeTrue();
+  });
 
-    expect(googleMapsServiceSpy.loadGoogleMaps).toHaveBeenCalled();
-  })
+  it('should set sidenavFullHeight to false when routerUtilsServiceMock.hasRoute returns false', () => {
+    routerUtilsServiceMock.hasRoute.and.returnValue(of(false));
+    expect(component.sidenavFullHeight()).toBeTrue();
+  });
 });

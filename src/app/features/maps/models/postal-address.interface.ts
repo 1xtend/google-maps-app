@@ -1,5 +1,5 @@
 export interface PostalAddress {
-  "@type": string[];
+  "@type"?: string[];
   streetAddress?: string;
   addressLocality?: string;
   addressRegion?: string;
