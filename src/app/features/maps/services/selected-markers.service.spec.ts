@@ -13,7 +13,6 @@ describe('SelectedMarkersService', () => {
 
   function createMarkerEl(): HTMLElement {
     const el = document.createElement('div');
-    el.classList.remove('active-marker');
     markerElements.push(el);
     return el;
   }
@@ -30,7 +29,7 @@ describe('SelectedMarkersService', () => {
   afterEach(() => {
     markerElements.forEach((el) => el.remove());
     markerElements = [];
-  })
+  });
 
   it('should be created', () => {
     expect(service).toBeTruthy();

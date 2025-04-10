@@ -87,7 +87,7 @@ export class SidenavComponent {
     }
 
     const filterValue: string = value.trim().toLowerCase();
-    this.filteredCounties.set(this.countiesList.filter((county) => county.toLowerCase().includes(filterValue)))
+    this.filteredCounties.set(this.countiesList.filter((county) => county.toLowerCase().includes(filterValue)));
   }
 
   onReload(): void {
@@ -98,10 +98,10 @@ export class SidenavComponent {
     this.filtersForm.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef),
       debounceTime(300),
-      distinctUntilChanged((prev, curr) => this.deepEqual(prev, curr)),
+      distinctUntilChanged((prev, curr) => this.deepEqual(prev, curr))
     ).subscribe((value) => {
       this.placesFilterService.updateFilters(value);
-    })
+    });
   }
 
   private deepEqual(a: any, b: any): boolean {
