@@ -38,7 +38,7 @@ describe('GoogleMapsService', () => {
       await service.loadGoogleMaps();
 
       expect(scriptCreateSpy).toHaveBeenCalled();
-      expect(service.isGoogleMapsLoaded()).toBeTrue();
+      expect(service.isLoaded()).toBeTrue();
     })
   })
 });
